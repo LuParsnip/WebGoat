@@ -24,7 +24,7 @@ public class VulnerableComponentsLesson implements AssignmentEndpoint {
   public @ResponseBody AttackResult completed(@RequestParam String payload) {
     XStream xstream = new XStream();
     xstream.setClassLoader(Contact.class.getClassLoader());
-    
+    //
     // CRITICAL: Apply security restrictions
     // 1. Start with denying all types
     xstream.addPermission(NoTypePermitted.NONE);
