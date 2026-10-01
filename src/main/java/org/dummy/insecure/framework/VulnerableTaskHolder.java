@@ -47,7 +47,7 @@ public class VulnerableTaskHolder implements Serializable {
    */
   private void readObject(ObjectInputStream stream) throws Exception {
     // Fix 1: Apply JVM Class Filter (Allowlist safe classes, reject all others with ';!\*')
-    ObjectInputFilter filter = ObjectInputFilter.Config.createFilter( "java.time.LocalDateTime;java.lang.String;org.dummy.insecure.framework.SecureTaskHolder;!\*" );
+    ObjectInputFilter filter = ObjectInputFilter.Config.createFilter( "java.time.LocalDateTime;java.lang.String;org.dummy.insecure.framework.VulnerableTaskHolder;!*");
     stream.setObjectInputFilter(filter);
     // Fix 2: Safely restore serialized fields (throws InvalidClassException if object stream contains unauthorized classes) 
     stream.defaultReadObject();;
