@@ -66,8 +66,9 @@ public class VulnerableTaskHolder implements Serializable {
 
     // Fix 3: Layer 1 Mitigation (Sink Removal): Removed Runtime.getRuntime().exec() entirely. 
     // Untrusted strings restored from a stream are never passed directly to OS execution sinks.
-    // condition is here to prevent you from destroying the goat altogether
     log.info("Task '{}' validated and queued safely without process execution.", taskName);
+
+    // condition is here to prevent you from destroying the goat altogether
     /**if ((taskAction.startsWith("sleep") || taskAction.startsWith("ping"))
         && taskAction.length() < 22) {
       log.info("about to execute: {}", taskAction);
