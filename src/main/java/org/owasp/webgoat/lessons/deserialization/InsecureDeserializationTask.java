@@ -5,7 +5,9 @@
 
 /*
 This adjusted file from OWASPs Webgoat InsecureDeserializationTask.java aims to add mitigations to the deserialisation vulnerability.
-
+The mitigation attempts involve rejecting malformed, oversized, or stale input before processing and 
+parsing only a constrained JSON payload into a minimal DTO instead of accepting arbitrary object streams. 
+These checks enforce fail-closed validation and reduce the risk of unsafe object construction.
 */
 
 package org.owasp.webgoat.lessons.deserialization;
@@ -41,9 +43,7 @@ public class InsecureDeserializationTask implements AssignmentEndpoint {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
-  /**
-   * Safe DTO for deserialization—only fields we expect, no command execution.
-   */
+  // Fix 1: Replace binary Java deserialisation with schema-constrained JSON parsing.
   static class TaskDto {
     public String taskName;
     public String taskAction;
@@ -58,7 +58,7 @@ public class InsecureDeserializationTask implements AssignmentEndpoint {
     }
 
     try {
-      // Normalize base64 padding
+      // Fix 2: Normalise and validate the token for malformed base64 varianrs and reject them before decoding.
       String normalized = token.replace('-', '+').replace('_', '/');
       while (normalized.length() % 4 != 0) {
         normalized += '=';
@@ -71,23 +71,23 @@ public class InsecureDeserializationTask implements AssignmentEndpoint {
         return failed(this).feedback("insecure-deserialization.expired").build();
       }
 
-      // Reject oversized payloads
+      // Fix 3: Enforce a strict payload size limit.
       if (payload.length == 0 || payload.length > MAX_PAYLOAD_SIZE) {
         return failed(this).feedback("insecure-deserialization.expired").build();
       }
 
-      // Deserialize JSON instead of binary Java objects
+      // Fix 4: Parse only a known JSON schema instead of arbitrary Java objects.
       long before = System.currentTimeMillis();
       TaskDto task = objectMapper.readValue(payload, TaskDto.class);
       long after = System.currentTimeMillis();
 
-      // Validate required fields
+      // Fix 5: Validate required semantic fields before accepting the request.
       if (task.taskName == null || task.taskName.isBlank() ||
           task.taskAction == null || task.taskAction.isBlank()) {
         return failed(this).feedback("insecure-deserialization.wrongobject").build();
       }
 
-      // Validate timestamp is within acceptable window
+      // Fix 6: Reject absent or stale execution timestamps.
       if (task.requestedExecutionTime == null || task.requestedExecutionTime.isBlank()) {
         return failed(this).feedback("insecure-deserialization.invalidversion").build();
       }
@@ -100,7 +100,7 @@ public class InsecureDeserializationTask implements AssignmentEndpoint {
         return failed(this).feedback("insecure-deserialization.expired").build();
       }
 
-      // Validate timing constraint (if needed for the lesson)
+      // Fix 7: Use timing as a secondary sanity check.
       int delay = (int) (after - before);
       if (delay > MAX_DELAY_MS || delay < MIN_DELAY_MS) {
         return failed(this).build();
