@@ -2,6 +2,12 @@
  * SPDX-FileCopyrightText: Copyright © 2014 WebGoat authors
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
+
+/*
+This adjusted file from OWASPs Webgoat InsecureDeserializationTask.java aims to add mitigations to the deserialisation vulnerability.
+
+*/
+
 package org.owasp.webgoat.lessons.deserialization;
 
 import static org.owasp.webgoat.container.assignments.AttackResultBuilder.failed;
