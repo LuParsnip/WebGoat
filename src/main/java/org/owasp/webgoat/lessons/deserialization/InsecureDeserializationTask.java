@@ -5,9 +5,9 @@
 
 /*
 This adjusted file from OWASPs Webgoat InsecureDeserializationTask.java aims to add mitigations to the deserialisation vulnerability.
-The mitigation attempts involve rejecting malformed, oversized, or stale input before processing and 
-parsing only a constrained JSON payload into a minimal DTO instead of accepting arbitrary object streams. 
-These checks enforce fail-closed validation and reduce the risk of unsafe object construction.
+The mitigation attempts involve rejecting malformed, oversized, or stale payloads before processing. It accepts only a constrained JSON representation 
+of the task and validates the required fields, temporal window, and token structure to avoid unsafe object construction. 
+These controls enforce fail-closed validation and reduce the risk of deserialization abuse
 */
 
 package org.owasp.webgoat.lessons.deserialization;
@@ -100,7 +100,7 @@ public class InsecureDeserializationTask implements AssignmentEndpoint {
         return failed(this).feedback("insecure-deserialization.expired").build();
       }
 
-      // Fix 7: Use timing as a secondary sanity check.
+      // Use timing as a secondary sanity check.
       int delay = (int) (after - before);
       if (delay > MAX_DELAY_MS || delay < MIN_DELAY_MS) {
         return failed(this).build();
